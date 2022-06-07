@@ -1,0 +1,29 @@
+version: '3.2'
+services:
+    # echo1:
+    #     image: hashicorp/http-echo:0.2.3
+    #     ports:
+    #         - 5678:5678
+    #     command: ["-text=echo1"]
+    #     network_mode: "host"
+
+
+    echo:
+        image: sgaunet/http-echo:latest
+        # ports:
+        #     - 5678:8080
+        # network_mode: "host"
+
+    ratelimiter:
+      image: sgaunet/ratelimiter:latest
+      ports:
+        - 1337:1337
+      environment:
+        - RATELIMIT_TARGET=http://echo:8080
+        - RATELIMIT_DAEMONPORT=1337
+        - RATELIMIT_LOGLEVEL=debug
+        - RATELIMIT_NUMBER=305
+        - RATELIMIT_DURATIONINSECONDS=10
+      # network_mode: "host"
+
+      

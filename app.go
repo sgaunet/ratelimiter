@@ -40,15 +40,23 @@ func (a *App) serveReverseProxy(target string, res http.ResponseWriter, req *htt
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 	}
+	if url.Scheme == "" {
+		url.Scheme = "http"
+	}
+	if url.Host == "" {
+		url.Host = "localhost"
+	}
+
 	// create the reverse proxy
 	proxy := httputil.NewSingleHostReverseProxy(url)
 	proxy.Transport = &myTransport{}
 
 	// Update the headers to allow for SSL redirection
 	req.URL.Host = url.Host
-	req.URL.Scheme = url.Scheme
-	req.Header.Set("X-Forwarded-Host", req.Header.Get("Host"))
 	req.Host = url.Host
+	req.URL.Scheme = url.Scheme
+
+	req.Header.Set("X-Forwarded-Host", req.Header.Get("Host"))
 	// Note that ServeHttp is non blocking and uses a go routine under the hood
 	proxy.ServeHTTP(res, req)
 }

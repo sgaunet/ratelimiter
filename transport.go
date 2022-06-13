@@ -26,8 +26,8 @@ func (t *myTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// You may want to check the Content-Type header to decide how to deal with
 	// the body. In this case, we're assuming it's text.
 	if response == nil {
-		formatLog := "req.RemoteAddr=%s req.Host=%s req.URL.Path=%s req.URL.Query()=%s Error=%s\n"
-		log.Errorf(formatLog, GetIP(req), req.Host, req.URL.Path, req.URL.Query(), err.Error())
+		formatLog := "req.RemoteAddr=%s req.Host=%s req.URL.Path=%s req.URL.Query()=%s req.URL.Scheme=%s Error=%s\n"
+		log.Errorf(formatLog, GetIP(req), req.Host, req.URL.Path, req.URL.Query(), req.URL.Scheme, err.Error())
 	} else {
 		formatLog := "req.RemoteAddr=%s req.Host=%s req.URL.Path=%s req.URL.Query()=%s StatusCode=%d\n"
 		log.Infof(formatLog, GetIP(req), req.Host, req.URL.Path, req.URL.Query(), response.StatusCode)

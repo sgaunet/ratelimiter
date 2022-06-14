@@ -1,7 +1,7 @@
 
 # ratelimiter
 
-Utility to put in front of a webservice to handle a ratelimit. Works only with http protocol actually.
+Utility to put in front of a webservice to handle a ratelimit. Works only with http protocol actually and tha ratelimit is **global** (not by IP).
 
 ## Configuration
 
@@ -29,7 +29,7 @@ RATELIMIT_DURATIONINSECONDS
 
 # Execution
 
-With a docker-compose :
+With a docker-compose (change the latest to the latest version) :
 
 
 ```

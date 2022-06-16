@@ -56,7 +56,7 @@ func (a *App) serveReverseProxy(target string, res http.ResponseWriter, req *htt
 	req.Host = url.Host
 	req.URL.Scheme = url.Scheme
 
-	req.Header.Set("X-Forwarded-Host", req.Header.Get("Host"))
+	// req.Header.Set("X-Forwarded-Host", req.Header.Get("Host"))
 	// Note that ServeHttp is non blocking and uses a go routine under the hood
 	proxy.ServeHTTP(res, req)
 }

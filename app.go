@@ -7,24 +7,23 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/sgaunet/ratelimit"
 )
 
 type App struct {
-	cfg ConfigYaml
-	r   *ratelimit.RateLimit
+	cfg   ConfigYaml
+	rates map[string]*ratelimit.RateLimit
+	mu    sync.Mutex
 }
 
 func NewApp(cfg ConfigYaml) (*App, error) {
-	r, err := ratelimit.New(context.Background(), time.Duration(cfg.RateDurationInSeconds)*time.Second, cfg.RateNumber)
-	if err != nil {
-		return nil, err
-	}
 	app := &App{
-		cfg: cfg,
-		r:   r,
+		cfg:   cfg,
+		rates: make(map[string]*ratelimit.RateLimit),
 	}
 	log.Debugln("           DaemonPort=", cfg.DaemonPort)
 	log.Debugln("RateDurationInSeconds=", cfg.RateDurationInSeconds)
@@ -61,16 +60,35 @@ func (a *App) serveReverseProxy(target string, res http.ResponseWriter, req *htt
 	proxy.ServeHTTP(res, req)
 }
 
+func (a *App) handleRate(ip string) error {
+	var err error
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	_, found := a.rates[ip]
+	if !found {
+		a.rates[ip], err = ratelimit.New(context.Background(), time.Duration(a.cfg.RateDurationInSeconds)*time.Second, a.cfg.RateNumber)
+	}
+	return err
+}
+
 // Given a request send it to the appropriate url
 func (a *App) handleRequestAndRedirect(res http.ResponseWriter, req *http.Request) {
 	var httpStatusCode int
-	if !a.r.IsLimitReached() {
-		a.serveReverseProxy(a.cfg.TargetService, res, req)
+	err := a.handleRate(GetIP(req))
+	if err != nil {
+		log.Errorln(err.Error())
 	} else {
-		httpStatusCode = http.StatusTooManyRequests
-		http.Error(res, "Too many requests", httpStatusCode)
-		formatLog := "req.RemoteAddr=%s req.Host=%s req.URL.Path=%s req.URL.Query()=%s StatusCode=%d\n"
-		log.Infof(formatLog, GetIP(req), req.Host, req.URL.Path, req.URL.Query(), httpStatusCode)
+		a.mu.Lock()
+		isLimitReached := a.rates[GetIP(req)].IsLimitReached()
+		a.mu.Unlock()
+		if !isLimitReached {
+			a.serveReverseProxy(a.cfg.TargetService, res, req)
+		} else {
+			httpStatusCode = http.StatusTooManyRequests
+			http.Error(res, "Too many requests", httpStatusCode)
+			formatLog := "req.RemoteAddr=%s req.Host=%s req.URL.Path=%s req.URL.Query()=%s StatusCode=%d\n"
+			log.Infof(formatLog, GetIP(req), req.Host, req.URL.Path, req.URL.Query(), httpStatusCode)
+		}
 	}
 }
 
@@ -79,9 +97,9 @@ func (a *App) handleRequestAndRedirect(res http.ResponseWriter, req *http.Reques
 func GetIP(r *http.Request) string {
 	forwarded := r.Header.Get("X-FORWARDED-FOR")
 	if forwarded != "" {
-		return forwarded
+		return strings.Split(forwarded, ":")[0]
 	}
-	return r.RemoteAddr
+	return strings.Split(r.RemoteAddr, ":")[0]
 }
 
 func (a *App) LaunchWebServer() {

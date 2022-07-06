@@ -30,7 +30,26 @@ func NewApp(cfg ConfigYaml) (*App, error) {
 	log.Debugln("           RateNumber=", cfg.RateNumber)
 	log.Debugln("        TargetService=", cfg.TargetService)
 
+	go app.removeObsoleteRates()
+
 	return app, nil
+}
+
+func (a *App) removeObsoleteRates() {
+	tick := time.NewTicker(10 * time.Second)
+	for range tick.C {
+		log.Debugln("garbage rates", time.Now())
+		a.mu.Lock()
+		for ip := range a.rates {
+			if a.rates[ip].GetLastCall().Before(time.Now().Add(time.Duration(-2*a.cfg.RateDurationInSeconds) * time.Second)) {
+				// log.Debugln("detele ", ip)
+				// log.Debugln("last call=", a.rates[ip].GetLastCall())
+				// log.Debugln("garbage rates whoch last call before ", time.Now().Add(time.Duration(-2*a.cfg.RateDurationInSeconds)*time.Second))
+				delete(a.rates, ip)
+			}
+		}
+		a.mu.Unlock()
+	}
 }
 
 // Serve a reverse proxy for a given url

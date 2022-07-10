@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -15,6 +14,7 @@ import (
 )
 
 type App struct {
+	http.Handler
 	cfg   ConfigYaml
 	rates map[string]*ratelimit.RateLimit
 	mu    sync.Mutex
@@ -38,13 +38,11 @@ func NewApp(cfg ConfigYaml) (*App, error) {
 func (a *App) removeObsoleteRates() {
 	tick := time.NewTicker(10 * time.Second)
 	for range tick.C {
-		log.Debugln("garbage rates", time.Now())
 		a.mu.Lock()
 		for ip := range a.rates {
+			// if IP have not requested service since 2*a.cfg.RateDurationInSeconds
 			if a.rates[ip].GetLastCall().Before(time.Now().Add(time.Duration(-2*a.cfg.RateDurationInSeconds) * time.Second)) {
-				// log.Debugln("detele ", ip)
-				// log.Debugln("last call=", a.rates[ip].GetLastCall())
-				// log.Debugln("garbage rates whoch last call before ", time.Now().Add(time.Duration(-2*a.cfg.RateDurationInSeconds)*time.Second))
+				// delete the IP from the a.rates map
 				delete(a.rates, ip)
 			}
 		}
@@ -56,23 +54,39 @@ func (a *App) removeObsoleteRates() {
 func (a *App) serveReverseProxy(target string, res http.ResponseWriter, req *http.Request) {
 	url, err := url.Parse(target)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
+		log.Errorln(err.Error())
+		fmt.Fprintf(res, "Internal error (ratelimiter)")
+		http.Error(res, "Too many requests", http.StatusInternalServerError)
+		return
 	}
-	if url.Scheme == "" {
-		url.Scheme = "http"
-	}
+
+	log.Debugln("req.URL.Host=", req.URL.Host)
+	log.Debugln("req.RequestURI=", req.RequestURI)
+	log.Debugln("req.URL.Path=", req.URL.Path)
+	log.Debugln("req.URL.RawPath=", req.URL.RawPath)
+	log.Debugln("req.URL.RawQuery=", req.URL.RawQuery)
+	hostCopy := req.Host // Need to preserve original Host request in the response
 	if url.Host == "" {
+		log.Debugln("url.Host empty, set to localhost")
 		url.Host = "localhost"
 	}
 
 	// create the reverse proxy
 	proxy := httputil.NewSingleHostReverseProxy(url)
 	proxy.Transport = &myTransport{}
+	proxy.ModifyResponse = func(resp *http.Response) error {
+		log.Debugln("modify response Host=", hostCopy)
+		resp.Request.Host = hostCopy
+		return nil
+	}
 
-	// Update the headers to allow for SSL redirection
 	req.URL.Host = url.Host
-	req.Host = url.Host
 	req.URL.Scheme = url.Scheme
+	// req.Header.Set("X-Forwarded-Host", req.Header.Get("Host"))
+
+	log.Debugln("modified req.URL.Host=", req.URL.Host)
+	log.Debugln("not modified req.Host=", req.Host)
+	log.Debugln("modified req.URL.Scheme=", req.URL.Scheme)
 
 	// req.Header.Set("X-Forwarded-Host", req.Header.Get("Host"))
 	// Note that ServeHttp is non blocking and uses a go routine under the hood
@@ -91,7 +105,7 @@ func (a *App) handleRate(ip string) error {
 }
 
 // Given a request send it to the appropriate url
-func (a *App) handleRequestAndRedirect(res http.ResponseWriter, req *http.Request) {
+func (a *App) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	var httpStatusCode int
 	err := a.handleRate(GetIP(req))
 	if err != nil {
@@ -114,17 +128,18 @@ func (a *App) handleRequestAndRedirect(res http.ResponseWriter, req *http.Reques
 // GetIP gets a requests IP address by reading off the forwarded-for
 // header (for proxies) and falls back to use the remote address.
 func GetIP(r *http.Request) string {
+	// X-Forwarded-For: <client>, <proxy1>, <proxy2>
 	forwarded := r.Header.Get("X-FORWARDED-FOR")
-	if forwarded != "" {
-		return strings.Split(forwarded, ":")[0]
+	firstIP := strings.Split(forwarded, ", ")[0]
+	if firstIP != "" {
+		return firstIP
 	}
 	return strings.Split(r.RemoteAddr, ":")[0]
 }
 
 func (a *App) LaunchWebServer() {
-	http.HandleFunc("/", a.handleRequestAndRedirect)
 	port := fmt.Sprintf(":%d", a.cfg.DaemonPort)
-	if err := http.ListenAndServe(port, nil); err != nil {
+	if err := http.ListenAndServe(port, a); err != nil {
 		log.Fatalln(err.Error())
 	}
 }

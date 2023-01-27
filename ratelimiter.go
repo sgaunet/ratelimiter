@@ -11,6 +11,8 @@ import (
 
 var log *logrus.Logger
 
+// getEnvIntVar convert value of env var to int
+// Will exit 1 if value is not an integer
 func getEnvIntVar(envVar string) (number int) {
 	var err error
 	varString := os.Getenv(envVar)
@@ -48,7 +50,11 @@ func main() {
 		}
 	}
 
-	cfg.SetDefaultValue()
+	err = cfg.SetDefaultValue()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
 	log = initTrace(cfg.LogLevel)
 	app, err := NewApp(cfg)
 	if err != nil {

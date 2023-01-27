@@ -1,0 +1,7 @@
+version: '3.2'
+services:
+    echo:
+        image: sgaunet/http-echo:latest
+        # ports:
+        #     - 5678:8080
+        network_mode: "host"

@@ -1,13 +1,5 @@
 version: '3.2'
 services:
-    # echo1:
-    #     image: hashicorp/http-echo:0.2.3
-    #     ports:
-    #         - 5678:5678
-    #     command: ["-text=echo1"]
-    #     network_mode: "host"
-
-
     echo:
         image: sgaunet/http-echo:latest
         # ports:
@@ -22,5 +14,3 @@ services:
         - ./conf.yaml:/conf.yaml
       command: /ratelimiter -c /conf.yaml
       network_mode: "host"
-
-      

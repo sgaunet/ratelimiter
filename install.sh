@@ -32,7 +32,7 @@ then
 logLevel: info
 rateNumber: 100
 rateDurationInSeconds: 1
-tagetService: http://localhost:80
+targetService: http://localhost:80
 daemonPort: 1337
 EOF
 else

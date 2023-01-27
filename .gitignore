@@ -1,3 +1,7 @@
 .task
 ratelimiter
 dist
+*.bin
+result.html
+targets.txt
+ip.txt

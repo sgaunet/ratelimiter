@@ -11,20 +11,28 @@ tasks:
       - CGO_ENABLED=0 go build .
       - upx ./{{.BINFILE}}
     # silent: true
-    sources:
-    - ./**/*
-    method: checksum
-    generates:
-      - "{{.BINFILE}}"
+    # sources:
+    # - ./**/*
+    # method: checksum
+    # generates:
+    #   - "{{.BINFILE}}"
 
   image:
     deps: 
     - default
-    sources:
-      - ./**/*
+    # sources:
+    #   - ./**/*
     cmds:
       - docker build . -t {{.IMG}}
       - docker push {{.IMG}}
+
+  load-test:
+    dir: tst/load-test
+    cmds:
+      - ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | grep -v '^172' | tail -1 > ip.txt
+      - echo "GET http://$(cat ip.txt):1337" > targets.txt
+      - vegeta attack -duration="300s" -rate="300" -targets="targets.txt" -output=attack.bin
+      - vegeta plot -title="ratelimiter" attack.bin > "result.html"
 
   snapshot:
     cmds:

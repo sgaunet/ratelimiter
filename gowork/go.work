@@ -1,6 +1,6 @@
 go 1.18
 
 use (
-/home/sylvain/ratelimit
+/home/sylvain/GITHUB/PUBLIC/ratelimit
 /home/sylvain/GITHUB/PUBLIC/ratelimiter
 )

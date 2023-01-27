@@ -6,14 +6,11 @@ services:
     #         - 5678:5678
     #     command: ["-text=echo1"]
     #     network_mode: "host"
-
-
     echo:
         image: sgaunet/http-echo:latest
         # ports:
         #     - 5678:8080
         # network_mode: "host"
-
     ratelimiter:
       image: sgaunet/ratelimiter:latest
       ports:
@@ -25,5 +22,3 @@ services:
         - RATELIMIT_NUMBER=305
         - RATELIMIT_DURATIONINSECONDS=10
       # network_mode: "host"
-
-      

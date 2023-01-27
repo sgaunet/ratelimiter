@@ -1,0 +1,7 @@
+---
+logLevel: info
+rateNumber: 5
+rateDurationInSeconds: 1
+targetService: http://localhost:8080
+# targetService: http://localhost:5678
+daemonPort: 1337

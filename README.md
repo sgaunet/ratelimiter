@@ -81,6 +81,32 @@ This project is using :
 * docker manifest
 * [goreleaser](https://goreleaser.com/)
 * [vegeta](https://github.com/tsenart/vegeta) : load testing tool
+* [pre-commit](https://pre-commit.com/)
+
+There are hooks executed in the precommit stage. Once the project cloned on your disk, please install pre-commit:
+
+```
+brew install pre-commit
+```
+
+Install tools:
+
+```
+task install-prereq
+```
+
+And install the hooks:
+
+```
+task install-pre-commit
+```
+
+If you like to launch manually the pre-commmit hook:
+
+```
+task pre-commit
+```
+
 
 ## tasks
 

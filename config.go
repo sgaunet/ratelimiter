@@ -26,7 +26,7 @@ func (c *ConfigYaml) SetDefaultValue() error {
 		c.LogLevel = "info"
 	}
 	if c.TargetService == "" {
-		return errors.New("TargetService not specified.")
+		return errors.New("TargetService not specified")
 	}
 	return nil
 }

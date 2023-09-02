@@ -66,6 +66,7 @@ Or with the single binary, option -c to specify a configuration file.
 curl -s https://raw.githubusercontent.com/sgaunet/ratelimiter/main/install.sh | sudo bash
 ```
 
+**This script has been only tested on amd64 arch.**
 
 # Development
 

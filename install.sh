@@ -4,9 +4,15 @@ githubURL="https://github.com/sgaunet/ratelimiter"
 version=$(basename "$(curl -fs -o /dev/null -w %{redirect_url} ${githubURL}/releases/latest)" | sed "s#^v##g")
 os=$(uname)
 arch=$(uname -p)
+
+if [ "$arch" == "x86_64" ]
+then
+    arch="amd64"
+fi
+
 service=$(basename "$githubURL")
 serviceFile=/usr/lib/systemd/system/${service}.service
-release="https://github.com/sgaunet/${service}/releases/download/v${version}/${service}_${version}_${os}_${arch}.tar.gz"
+release="https://github.com/sgaunet/${service}/releases/download/v${version}/${service}_${version}_${os}_${arch}"
 
 w=$(whoami)
 
@@ -23,7 +29,7 @@ then
 fi
 
 echo "${service} version ${version} will be installed in /usr/local/bin/"
-curl -Ls ${release} | tar xz -C /usr/local/bin/ ${service}
+curl -Ls ${release} -o /usr/local/bin/${service}
 
 if [ ! -f "/etc/${service}.cfg" ]
 then

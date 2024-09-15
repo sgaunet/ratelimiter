@@ -5,11 +5,16 @@ vars:
   IMG: sgaunet/ratelimiter:latest
 
 tasks:
+
   default:
+    desc: "List all available tasks"
+    cmds:
+      - task -a
+
+  build:
     cmds:
       - go mod tidy
       - CGO_ENABLED=0 go build .
-      - upx ./{{.BINFILE}}
 
   install-prereq:
     cmds:

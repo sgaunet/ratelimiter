@@ -1,7 +1,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/sgaunet/ratelimiter)](https://goreportcard.com/report/github.com/sgaunet/ratelimiter)
 [![GitHub release](https://img.shields.io/github/release/sgaunet/ratelimiter.svg)](https://github.com/sgaunet/ratelimiter/releases/latest)
 ![GitHub Downloads](https://img.shields.io/github/downloads/sgaunet/ratelimiter/total)
-[![Maintainability](https://api.codeclimate.com/v1/badges/6a77e40e92008bab6661/maintainability)](https://codeclimate.com/github/sgaunet/ratelimiter/maintainability)
 [![License](https://img.shields.io/github/license/sgaunet/ratelimiter.svg)](LICENSE)
 
 # ratelimiter

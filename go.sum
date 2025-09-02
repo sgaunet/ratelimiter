@@ -3,8 +3,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/sgaunet/ratelimit v1.1.1 h1:KMjECNcA9U614eFYr2/y5+kee14miFbUQhctAS2ROzg=
-github.com/sgaunet/ratelimit v1.1.1/go.mod h1:bEqLNIUEKkBfqZ5B22v44UfVLKsDMY5VXsnC+PcKvTE=
+github.com/sgaunet/ratelimit v1.2.0 h1:kY/gckhvT1KZ9y/KQHnEjn+7qUjZ+/hlGYaPUGhJ26Q=
+github.com/sgaunet/ratelimit v1.2.0/go.mod h1:OPO7Yg7f+uphYoHVcGMwfnMVwyzIWrLE2I+fQfJx5rA=
 github.com/sirupsen/logrus v1.9.3 h1:dueUQJ1C2q9oE3F7wvmSGAaVtTmUizReu6fjN8uqzbQ=
 github.com/sirupsen/logrus v1.9.3/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

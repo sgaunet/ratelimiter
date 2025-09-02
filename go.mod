@@ -1,9 +1,9 @@
 module github.com/sgaunet/ratelimiter
 
-go 1.23
+go 1.24
 
 require (
-	github.com/sgaunet/ratelimit v1.1.1
+	github.com/sgaunet/ratelimit v1.2.0
 	github.com/sirupsen/logrus v1.9.3
 	gopkg.in/yaml.v2 v2.4.0
 )
